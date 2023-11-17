@@ -1,25 +1,44 @@
 import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import Header from './Components/HeaderComponents/Header';
+import ResultTable from './Components/ResultTable/ResultTable';
+import UserInput from './Components/UserInput/UserInput';
 
-function App() {
+export default function App() {
+  const [userInput, setUserInput] = useState('');
+
+  const calculateHandler = (userInput) => {
+    setUserInput(userInput);
+  };
+
+  const yearlyData = [];//per year data
+
+  if (userInput) {
+    let currentSavings = +userInput['current-savings'];
+    const yearlyContribution = +userInput['yearly-contribution'];
+    const expectedReturn = +userInput['expected-return'] / 100;
+    const duration = +userInput.duration;
+
+    for (let i = 0; i < duration; i++) {
+      const yearlyInterest = currentSavings * expectedReturn;
+      currentSavings += yearlyInterest + yearlyContribution;
+      yearlyData.push({
+        year: i + 1,
+        yearlyInterest: yearlyInterest,
+        savingsEndOfYear: currentSavings,
+        yearlyContribution: yearlyContribution,
+      });
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Header />
+
+      <UserInput onCalculate={calculateHandler} />
+      {!userInput && <p style={{textAlign: 'center'}}>No investment calculated yet.</p>}
+      {userInput && <ResultTable data={yearlyData} initialInvestment={userInput['current-savings']} />}
     </div>
   );
 }
-
-export default App;
